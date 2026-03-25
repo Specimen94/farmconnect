@@ -1,4 +1,4 @@
-// signup.js - REFACTORED (uses AuthAPI from api.js)
+// signup.js - FIXED (field names match backend RegisterRequest schema exactly)
 
 lucide.createIcons();
 
@@ -20,22 +20,26 @@ document.getElementById('signupForm').addEventListener('submit', async function 
 
     const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.innerText;
-    btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i>`;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i>';
     lucide.createIcons();
     btn.disabled = true;
 
+    // Field names must match backend RegisterRequest schema exactly
     const formData = {
         firstName: document.getElementById('firstName').value.trim(),
         lastName:  document.getElementById('lastName').value.trim(),
         username:  document.getElementById('usernameInput').value.trim(),
-        role:      document.getElementById('userRole').value, // 'farmer', 'buyer', 'transporter'
+        password:  document.querySelector('input[type="password"]').value.trim(),
+        role:      document.getElementById('userRole').value,
+        phone:     document.querySelector('input[type="tel"]')?.value.trim() || null,
+        location:  document.querySelector('input[placeholder*="Street"]')?.value.trim() || null,
+        nin:       document.querySelector('input[placeholder*="NIN"]')?.value.trim() || null,
     };
 
     try {
         const { user, token } = await AuthAPI.register(formData);
         setSession(user, token);
 
-        // Route by role
         const routes = {
             'Farmer':      'farmersview.html',
             'Transporter': 'logistics.html',
@@ -45,8 +49,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
 
     } catch (err) {
         btn.innerText = originalText;
-        btn.disabled = false;
-        // You can add an error message element to signup.html to display err.message
+        btn.disabled  = false;
         alert('Registration failed: ' + err.message);
     }
 });
